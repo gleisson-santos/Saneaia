@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Inteligência Operacional - Saneamento</title>
+    <meta name="description" content="Dashboard inteligente para gestão operacional de saneamento com IA e Machine Learning">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <div class="logo-icon">💧</div>
+                <div class="logo-text">
+                    <h1>SaneaIA</h1>
+                    <span>Inteligência Operacional</span>
+                </div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-section="dashboard" id="nav-dashboard">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">Dashboard</span>
+            </a>
+            <a href="#" class="nav-item" data-section="insights" id="nav-insights">
+                <span class="nav-icon">🧠</span>
+                <span class="nav-label">Insights IA</span>
+            </a>
+            <a href="#" class="nav-item" data-section="agent" id="nav-agent">
+                <span class="nav-icon">🤖</span>
+                <span class="nav-label">Agente IA</span>
+            </a>
+            <a href="#" class="nav-item" data-section="analytics" id="nav-analytics">
+                <span class="nav-icon">📈</span>
+                <span class="nav-label">Analytics</span>
+            </a>
+            <a href="#" class="nav-item" data-section="ml" id="nav-ml">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-label">Machine Learning</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="system-status">
+                <span class="status-dot" id="status-dot"></span>
+                <span class="status-text" id="status-text">Conectando...</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Bar -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="menu-toggle" id="menu-toggle">☰</button>
+                <h2 class="page-title" id="page-title">Dashboard</h2>
+            </div>
+            <div class="topbar-right">
+                <button class="btn-refresh" id="btn-refresh" title="Atualizar dados">🔄</button>
+                <span class="topbar-time" id="topbar-time"></span>
+            </div>
+        </header>
+
+        <!-- Dashboard Section -->
+        <section class="content-section active" id="section-dashboard">
+            <!-- KPI Cards -->
+            <div class="kpi-grid" id="kpi-grid">
+                <div class="kpi-card kpi-total">
+                    <div class="kpi-icon">📋</div>
+                    <div class="kpi-info">
+                        <span class="kpi-label">Total Solicitações</span>
+                        <span class="kpi-value" id="kpi-total">--</span>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-resolved">
+                    <div class="kpi-icon">✅</div>
+                    <div class="kpi-info">
+                        <span class="kpi-label">Resolvidas</span>
+                        <span class="kpi-value" id="kpi-resolved">--</span>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-open">
+                    <div class="kpi-icon">🔴</div>
+                    <div class="kpi-info">
+                        <span class="kpi-label">Em Aberto</span>
+                        <span class="kpi-value" id="kpi-open">--</span>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-time">
+                    <div class="kpi-icon">⏱️</div>
+                    <div class="kpi-info">
+                        <span class="kpi-label">Tempo Médio (horas)</span>
+                        <span class="kpi-value" id="kpi-time">--</span>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-neighborhoods">
+                    <div class="kpi-icon">📍</div>
+                    <div class="kpi-info">
+                        <span class="kpi-label">Bairros Ativos</span>
+                        <span class="kpi-value" id="kpi-neighborhoods">--</span>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-clients">
+                    <div class="kpi-icon">👥</div>
+                    <div class="kpi-info">
+                        <span class="kpi-label">Clientes</span>
+                        <span class="kpi-value" id="kpi-clients">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="charts-row">
+                <div class="chart-card">
+                    <h3 class="chart-title">Top Bairros por Solicitações</h3>
+                    <div class="chart-container" id="chart-bairros"></div>
+                </div>
+                <div class="chart-card">
+                    <h3 class="chart-title">Análise Temporal</h3>
+                    <div class="chart-container" id="chart-temporal"></div>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="table-card">
+                <h3 class="chart-title">Últimas Solicitações</h3>
+                <div class="table-container">
+                    <table class="data-table" id="table-solicitacoes">
+                        <thead>
+                            <tr>
+                                <th>SS</th>
+                                <th>Tipo</th>
+                                <th>Bairro</th>
+                                <th>Situação</th>
+                                <th>Encerramento</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Insights Section -->
+        <section class="content-section" id="section-insights">
+            <div class="section-header">
+                <h3>Insights da IA</h3>
+                <button class="btn-primary" id="btn-generate-insights">🧠 Gerar Novos Insights</button>
+            </div>
+            <div class="insights-grid" id="insights-grid">
+                <div class="loading-state">Clique em "Gerar Novos Insights" para iniciar a análise...</div>
+            </div>
+
+            <div class="section-header" style="margin-top: 2rem;">
+                <h3>Análise NLP das Observações</h3>
+                <button class="btn-secondary" id="btn-nlp-analysis">📝 Analisar Observações</button>
+            </div>
+            <div class="nlp-results" id="nlp-results">
+                <div class="loading-state">Clique para analisar o sentimento das observações...</div>
+            </div>
+        </section>
+
+        <!-- Agent Chat Section -->
+        <section class="content-section" id="section-agent">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <div class="chat-avatar">🤖</div>
+                    <div class="chat-info">
+                        <h3>Agente IA - Especialista em Saneamento</h3>
+                        <span class="chat-status">DeepSeek v3.2 via OpenRouter</span>
+                    </div>
+                </div>
+                <div class="chat-messages" id="chat-messages">
+                    <div class="message bot-message">
+                        <div class="message-avatar">🤖</div>
+                        <div class="message-content">
+                            Olá! Sou seu assistente de Inteligência Operacional para Saneamento.
+                            Posso analisar dados, identificar padrões e gerar recomendações.
+                            <br><br>
+                            Exemplos de perguntas:
+                            <ul>
+                                <li>"Quais bairros têm mais problemas de falta de água?"</li>
+                                <li>"Analise a tendência de solicitações nos últimos meses"</li>
+                                <li>"Quais clientes têm mais reincidência?"</li>
+                                <li>"Gere um relatório executivo dos KPIs"</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" class="chat-input" id="chat-input"
+                           placeholder="Digite sua pergunta..." autocomplete="off">
+                    <button class="btn-send" id="btn-send">Enviar</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Analytics Section -->
+        <section class="content-section" id="section-analytics">
+            <div class="analytics-grid">
+                <div class="chart-card full-width">
+                    <h3 class="chart-title">Análise por Setor</h3>
+                    <div class="chart-container" id="chart-setores"></div>
+                </div>
+                <div class="chart-card">
+                    <h3 class="chart-title">Análise por Tipo de Problema</h3>
+                    <div class="chart-container" id="chart-tipos"></div>
+                </div>
+                <div class="chart-card">
+                    <h3 class="chart-title">Reincidência de Clientes</h3>
+                    <div class="table-container" id="table-reincidencia"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ML Section -->
+        <section class="content-section" id="section-ml">
+            <div class="ml-grid">
+                <div class="chart-card">
+                    <h3 class="chart-title">Status do Modelo</h3>
+                    <div class="ml-status" id="ml-status">
+                        <div class="loading-state">Carregando métricas do modelo...</div>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3 class="chart-title">Ações</h3>
+                    <div class="ml-actions">
+                        <button class="btn-primary" id="btn-predict">🔮 Executar Predições</button>
+                        <button class="btn-secondary" id="btn-retrain">⚙️ Re-treinar Modelo</button>
+                    </div>
+                    <div class="ml-result" id="ml-result"></div>
+                </div>
+                <div class="chart-card full-width">
+                    <h3 class="chart-title">Histórico de Métricas</h3>
+                    <div class="table-container" id="table-metrics"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>
