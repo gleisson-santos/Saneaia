@@ -19,8 +19,8 @@ O sistema possui um pipeline completo (`ml.pipeline`) que aprende com o históri
 - **Treinamento e Predição:** Utiliza o algoritmo *RandomForestClassifier* tunado (class_weight='balanced') para identificar padrões sutis que humanos poderiam ignorar. Ele não apenas diz "sim ou não", ele entrega uma **Probabilidade de Recorrência (0 a 100%)**.
 - **Agendamento (Retreinamento Contínuo):** O modelo é desenhado para evoluir. Conforme novos dados entram no Supabase, o modelo pode ser retreinado para incorporar novas dinâmicas operacionais da cidade.
 
-### 🤖 2. NLP e Agente de IA (DeepSeek)
-- **Análise Semântica:** O módulo `agent.nlp` lê as observações deixadas por clientes e técnicos (texto livre) usando Processamento de Linguagem Natural. Ele identifica se o cliente está `Agressivo`, `Irritado`, `Sem água há dias` e cruza isso com o risco técnico.
+### 🤖 2. NLP e Agente de IA (Grok)
+- **Análise Semântica:** O módulo `agent.nlp` lê as observações deixadas por clientes e técnicos (texto livre) usando Processamento de Linguagem Natural através do modelo `x-ai/grok-4.1-fast`. Ele identifica se o cliente está `Agressivo`, `Irritado`, `Sem água há dias` e cruza isso com o risco técnico.
 - **Relatório Técnico Heurístico:** A integração cruza a predição matemática com a heurística de inteligência (ex: 6 meses vs 24 meses) para gerar insights em linguagem clara, como: *"ALERTA CRÍTICO: Risco de 98% de recorrência. O volume de chamados na matrícula confirma falha crônica."*
 
 ### 🔌 3. API e Integração (Servidor Central)

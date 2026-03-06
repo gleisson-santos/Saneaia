@@ -22,7 +22,7 @@ Este documento atua como o **Changelog** e **Base de Conhecimento Central** do p
 - **Exportação:** Salvamento do modelo treinado no arquivo `ml/models/saneala_rf_v1.joblib`.
 
 ### 🗣️ [v1.2.0] - NLP e Agente de IA
-- **Módulo DeepSeek:** Criação do `agent/nlp.py` integrado com OpenRouter (modelo `x-ai/grok-4.1-fast` configurado como base, compatível com chamadas padrão OpenAI).
+- **Módulo NLP:** Criação do `agent/nlp.py` integrado com OpenRouter (utilizando o modelo `x-ai/grok-4.1-fast` configurado como motor principal).
 - **Análise de Sentimento:** O Agente agora lê o campo de "observação" (texto-livre do técnico) e classifica o estado do cliente (ex: *Irritado*, *Agressivo*, *Calmo*), agregando isso ao relatório final.
 
 ### 🔌 [v1.3.0] - Integração Lovable Edge
