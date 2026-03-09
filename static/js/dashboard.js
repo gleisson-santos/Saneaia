@@ -113,10 +113,10 @@ function renderBarChart(containerId, data, labelKey, valueKey, maxItems = 10) {
 
 // === Load Dashboard Charts ===
 async function loadBairros(ano = 'Todos') {
-    let url = '/api/analytics/por-bairro?limit=10';
+    let url = '/api/analytics/bairros-criticos?limit=10';
     if (ano !== 'Todos') url += `&ano=${ano}`;
     const res = await api(url);
-    if (res) renderBarChart('chart-bairros', res.data, 'bairro', 'total_solicitacoes');
+    if (res) renderBarChart('chart-bairros', res.data, 'bairro', 'indice_critico');
 }
 
 // === Temporal / Sazonalidade / Evolução Anual ===

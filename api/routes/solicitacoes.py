@@ -69,36 +69,59 @@ async def get_kpis():
     return {"data": data[0] if data else {}}
 
 
-@router.get("/analytics/por-bairro")
-async def get_analytics_por_bairro(
-    limit: int = Query(default=20, ge=1, le=100),
+@router.get("/analytics/bairros-criticos")
+async def get_analytics_bairros_criticos(
+    limit: int = Query(default=10, ge=1, le=100),
     ano: Optional[int] = None,
 ):
-    """Analise de solicitacoes por bairro, com filtro opcional de ano."""
+    """Retorna os bairros com maiores indices de reincidencia e insatisfacao (Falta de agua, Vazamentos, Reclamacoes)."""
     supabase = get_supabase_client()
-    if not ano:
-        data = await supabase.get("analise_por_bairro", {
-            "order": "total_solicitacoes.desc",
-            "limit": str(limit),
-        })
-        return {"data": data}
         
-    # Agregação raw por ano
+    # Agregação raw dinâmica para suportar metricas de cruzamento e filtro temporal
     data = await supabase.get("solicitacoes", {
-        "select": "bairro, created_at",
+        "select": "bairro, matricula, servico, created_at",
         "limit": "100000",
     })
     
-    from collections import Counter
-    target_year = str(ano)
-    bairros = Counter()
+    from collections import defaultdict, Counter
+    target_year = str(ano) if ano else None
+    
+    bairros_score = Counter()
+    matriculas_por_bairro = defaultdict(list)
+    bairro_insatisfacao = Counter()
+    
+    # Palavras-chave associadas a insatisfação do cliente (esgoto, falta d'agua, vazamento)
+    keywords = ["FALTA AGUA", "VAZ", "RECL", "QUALIDADE", "RETORNO", "DESOBS"]
+    
     for d in data:
-        c_at = d.get("created_at", "")
-        if c_at and c_at.startswith(target_year):
-            b = d.get("bairro") or "Sem Bairro"
-            bairros[b] += 1
+        if target_year:
+            c_at = d.get("created_at", "")
+            if not c_at or not c_at.startswith(target_year):
+                continue
+                
+        b = d.get("bairro") or "Sem Bairro"
+        mat = d.get("matricula")
+        srv = str(d.get("servico", "")).upper()
+        
+        # 1. Contabiliza matrículas para cálculo de reincidência
+        if mat:
+            matriculas_por_bairro[b].append(mat)
             
-    result = [{"bairro": k, "total_solicitacoes": v} for k, v in bairros.most_common(limit)]
+        # 2. Contabiliza se o seviço é de natureza crítica/insatisfatória
+        if any(k in srv for k in keywords):
+            bairro_insatisfacao[b] += 1
+            
+    # Processa métricas
+    for b, mats in matriculas_por_bairro.items():
+        count_mats = Counter(mats)
+        # Uma reincidência é quando uma mesma matrícula tem 2 ou mais demandas
+        reincidencias = sum(1 for count in count_mats.values() if count > 1)
+        
+        # Peso do Índice Crítico: Reincidências pesam o dobro
+        score = (reincidencias * 2) + bairro_insatisfacao[b]
+        bairros_score[b] = score
+        
+    result = [{"bairro": k, "indice_critico": v} for k, v in bairros_score.most_common(limit)]
     return {"data": result}
 
 
