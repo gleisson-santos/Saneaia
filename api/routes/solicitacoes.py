@@ -174,3 +174,38 @@ async def get_reincidencia(min_solicitacoes: int = Query(default=3, ge=2)):
     })
     return {"data": data}
 
+
+@router.get("/analytics/mapa-calor-setor")
+async def get_mapa_calor_setor():
+    """Hierarquia de solicitacoes: Setor -> Bairro para Mapa de Calor."""
+    supabase = get_supabase_client()
+    data = await supabase.get("solicitacoes", {
+        "select": "setor, bairro",
+        "limit": "100000",
+    })
+    
+    # Aggregation logic
+    from collections import defaultdict
+    setores = defaultdict(lambda: defaultdict(int))
+    for d in data:
+        s = d.get("setor") or "DESCONHECIDO"
+        b = d.get("bairro") or "Sem Bairro"
+        setores[s][b] += 1
+        
+    result = []
+    for s, bairros_dict in setores.items():
+        total_setor = sum(bairros_dict.values())
+        bairros_list = [
+            {"bairro": b, "total": t}
+            for b, t in sorted(bairros_dict.items(), key=lambda x: x[1], reverse=True)[:10] # Top 10 bairros per sector to prevent UI clutter
+        ]
+        result.append({
+            "setor": s,
+            "total": total_setor,
+            "bairros": bairros_list
+        })
+        
+    # Sort sectors by total volume
+    result.sort(key=lambda x: x["total"], reverse=True)
+    return {"data": result[:15]} # Top 15 sectors
+

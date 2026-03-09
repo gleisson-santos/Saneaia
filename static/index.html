@@ -204,6 +204,14 @@
                     <h3 class="chart-title">Análise por Setor</h3>
                     <div class="chart-container" id="chart-setores"></div>
                 </div>
+                <div class="chart-card full-width">
+                    <h3 class="chart-title"><i data-lucide="map"
+                            style="width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;"></i> Mapa de
+                        Concentração (Setor &gt; Bairro)</h3>
+                    <div class="heatmap-container" id="chart-heatmap-setores">
+                        <div class="loading-state">Carregando mapa de calor...</div>
+                    </div>
+                </div>
                 <div class="chart-card">
                     <h3 class="chart-title">Análise por Tipo de Problema</h3>
                     <div class="chart-container" id="chart-tipos"></div>
@@ -247,7 +255,7 @@
     <script>
         lucide.createIcons();
     </script>
-    <script src="/static/js/dashboard.js?v=4"></script>
+    <script src="/static/js/dashboard.js?v=5"></script>
 </body>
 
 </html>

@@ -161,6 +161,59 @@ async function loadAnalytics() {
     }
 }
 
+// === Heatmap Section ===
+async function loadMapaCalorSetor() {
+    const res = await api('/api/analytics/mapa-calor-setor');
+    const container = document.getElementById('chart-heatmap-setores');
+
+    if (!res || !res.data || res.data.length === 0) {
+        container.innerHTML = '<div class="loading-state">Sem dados de concentração geográfica.</div>';
+        return;
+    }
+
+    let html = '';
+
+    res.data.forEach(setorData => {
+        const sectorName = setorData.setor;
+        const totalSector = setorData.total;
+        const bairros = setorData.bairros;
+
+        if (bairros.length === 0) return;
+
+        // Find max value in this sector to scale the opacity
+        const maxVal = Math.max(...bairros.map(b => b.total));
+
+        html += `<div class="heatmap-sector">
+            <div class="heatmap-sector-title">
+                <span>${sectorName.substring(0, 30)}...</span>
+                <span>${totalSector} Chamados</span>
+            </div>
+            <div class="heatmap-grid">`;
+
+        bairros.forEach(b => {
+            const val = b.total;
+            // Calculate a scale from 1 to 5 for the heat
+            const heatLevel = Math.max(1, Math.ceil((val / maxVal) * 5));
+            // Calculate opacity based on heatLevel (0.2 to 1.0)
+            const opacity = (0.3 + (heatLevel * 0.14)).toFixed(2);
+
+            // Reusing the accent blue color with variable opacity
+            const style = `background-color: rgba(59, 130, 246, ${opacity})`;
+
+            html += `<div class="heatmap-cell" 
+                        style="${style}" 
+                        title="${b.bairro}: ${val} solicitações">
+                        ${val}
+                     </div>`;
+        });
+
+        html += `   </div>
+                </div>`;
+    });
+
+    container.innerHTML = html;
+}
+
 // === Chat ===
 const chatMessages = document.getElementById('chat-messages');
 const chatInput = document.getElementById('chat-input');
@@ -289,5 +342,7 @@ async function loadAll() {
     loadBairros();
     loadTemporal();
     loadSazonalidade();
+    loadAnalytics();
+    loadMapaCalorSetor();
 }
 loadAll();
