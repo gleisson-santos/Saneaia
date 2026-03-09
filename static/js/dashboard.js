@@ -117,24 +117,29 @@ async function loadTemporal() {
     if (res) renderBarChart('chart-temporal', res.data, 'mes', 'total_solicitacoes');
 }
 
-// === Solicitações Table ===
-async function loadSolicitacoes() {
-    const res = await api('/api/solicitacoes?limit=20');
+// === Sazonalidade Chart ===
+async function loadSazonalidade() {
+    const res = await api('/api/analytics/temporal');
     if (!res || !res.data) return;
-    const tbody = document.getElementById('table-body');
-    tbody.innerHTML = res.data.map(d => {
-        const sit = d.situacao || 'Desconhecida';
-        let badge = 'badge-info';
-        if (sit.toLowerCase().includes('conclu')) badge = 'badge-success';
-        else if (sit.toLowerCase().includes('aberta')) badge = 'badge-danger';
-        const enc = d.data_encerramento ? new Date(d.data_encerramento).toLocaleDateString('pt-BR') : '--';
-        return `<tr>
-            <td>${d.ss || ''}</td>
-            <td>${(d.tipo || '').substring(0, 35)}</td>
-            <td>${(d.bairro || '').substring(0, 25)}</td>
-            <td><span class="badge ${badge}">${sit.substring(0, 20)}</span></td>
-            <td>${enc}</td></tr>`;
-    }).join('');
+
+    let verao = 0; // Dez a Mar
+    let chuvas = 0; // Abr a Jul
+    let secas = 0; // Ago a Nov
+
+    res.data.forEach(d => {
+        const m = d.mes_numero;
+        if (m >= 4 && m <= 7) chuvas += d.total_solicitacoes;
+        else if (m >= 8 && m <= 11) secas += d.total_solicitacoes;
+        else verao += d.total_solicitacoes;
+    });
+
+    const chartData = [
+        { periodo: 'Período Chuvoso (Abr-Jul)', total: chuvas },
+        { periodo: 'Verão (Dez-Mar)', total: verao },
+        { periodo: 'Primavera/Seca (Ago-Nov)', total: secas }
+    ].sort((a, b) => b.total - a.total);
+
+    renderBarChart('chart-sazonalidade', chartData, 'periodo', 'total');
 }
 
 // === Analytics Section ===
@@ -283,6 +288,6 @@ async function loadAll() {
     loadKPIs();
     loadBairros();
     loadTemporal();
-    loadSolicitacoes();
+    loadSazonalidade();
 }
 loadAll();

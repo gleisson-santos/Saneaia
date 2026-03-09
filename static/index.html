@@ -132,23 +132,12 @@
                 </div>
             </div>
 
-            <!-- Table -->
+            <!-- Sazonalidade Chart -->
             <div class="table-card">
-                <h3 class="chart-title">Últimas Solicitações</h3>
-                <div class="table-container">
-                    <table class="data-table" id="table-solicitacoes">
-                        <thead>
-                            <tr>
-                                <th>SS</th>
-                                <th>Tipo</th>
-                                <th>Bairro</th>
-                                <th>Situação</th>
-                                <th>Encerramento</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-body"></tbody>
-                    </table>
-                </div>
+                <h3 class="chart-title"><i data-lucide="cloud-rain"
+                        style="width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;"></i> Análise
+                    Sazonal (Verão vs Chuvas)</h3>
+                <div class="chart-container" id="chart-sazonalidade"></div>
             </div>
         </section>
 
@@ -258,7 +247,7 @@
     <script>
         lucide.createIcons();
     </script>
-    <script src="/static/js/dashboard.js"></script>
+    <script src="/static/js/dashboard.js?v=4"></script>
 </body>
 
 </html>
