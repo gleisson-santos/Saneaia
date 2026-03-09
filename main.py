@@ -20,7 +20,7 @@ import os
 
 from config.settings import get_settings
 from database.connection import test_connection
-from api.routes import solicitacoes, agent, predictions, integrations
+from api.routes import solicitacoes, agent, predictions, integrations, ml
 
 
 @asynccontextmanager
@@ -74,6 +74,7 @@ app.include_router(solicitacoes.router)
 app.include_router(agent.router)
 app.include_router(predictions.router)
 app.include_router(integrations.router)
+app.include_router(ml.router)
 
 
 # --- Health Check ---

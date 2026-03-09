@@ -119,6 +119,57 @@ async function loadBairros(ano = 'Todos') {
     if (res) renderBarChart('chart-bairros', res.data, 'bairro', 'indice_critico');
 }
 
+// === ML / Clustering Events ===
+async function loadMLEvents() {
+    const res = await api('/api/ml/events?hours=48');
+    if (!res) return;
+
+    const masterContainer = document.getElementById('ml-master-events');
+    const isolatedContainer = document.getElementById('ml-isolated-events');
+
+    masterContainer.innerHTML = '';
+    isolatedContainer.innerHTML = '';
+
+    const masters = res.events.filter(e => e.type === 'MASTER_EVENT');
+    const isolated = res.events.filter(e => e.type === 'ISOLATED_DIAGNOSTIC');
+
+    if (masters.length === 0) {
+        masterContainer.innerHTML = '<div class="loading-simple">Nenhum evento crítico detectado no momento. Rede estável.</div>';
+    } else {
+        masters.forEach(e => {
+            masterContainer.innerHTML += `
+                <div class="event-item master">
+                    <div class="event-header">
+                        <span class="event-type">ALERTA MESTRE</span>
+                        <span class="event-badge critical">${e.severity}</span>
+                    </div>
+                    <div class="event-title">${e.description}</div>
+                    <div class="event-cause">Causa Provável: <strong>${e.probable_cause}</strong></div>
+                    <div class="event-location"><i data-lucide="map-pin" style="width:12px"></i> ${e.location} - ${e.impact}</div>
+                </div>
+            `;
+        });
+    }
+
+    if (isolated.length === 0) {
+        isolatedContainer.innerHTML = '<div class="loading-simple">Nenhuma anomalia individual detectada.</div>';
+    } else {
+        isolated.forEach(e => {
+            isolatedContainer.innerHTML += `
+                <div class="event-item isolated">
+                    <div class="event-header">
+                        <span class="event-type">DIAGNÓSTICO ESPECIALISTA</span>
+                    </div>
+                    <div class="event-title">${e.description}</div>
+                    <div class="event-cause">Causa Provável: <strong>${e.probable_cause}</strong></div>
+                    <div class="event-location"><i data-lucide="map-pin" style="width:12px"></i> ${e.location}</div>
+                </div>
+            `;
+        });
+    }
+    lucide.createIcons();
+}
+
 // === Temporal / Sazonalidade / Evolução Anual ===
 async function fetchAndProcessTemporalData() {
     const res = await api('/api/analytics/temporal');
@@ -497,5 +548,6 @@ async function loadAll() {
     await fetchAndProcessTemporalData();
     loadAnalytics();
     loadMapaCalorSetor();
+    loadMLEvents();
 }
 loadAll();

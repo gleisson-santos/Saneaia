@@ -77,6 +77,13 @@ async def get_analytics_bairros_criticos(
     """Retorna os bairros com maiores indices de reincidencia e insatisfacao (Falta de agua, Vazamentos, Reclamacoes)."""
     supabase = get_supabase_client()
         
+    ### Fontes de Dados (Inputs)
+    # - **Logradouro / Bairro (COLUNAS ESTRUTURADAS):** Usaremos diretamente as colunas `logradouro` e `bairro` já existentes para medir a proximidade física (Cluster Espacial).
+    # - **Setor / Localidade:** Para identificar a zona hidráulica afetada.
+    # - **Serviço / Especificação:** Para definir a "Assinatura da Falha" (ex: Falta d'água + Vazamento de Rua = Rompimento de Adutora).
+    # - **Matrícula:** Para identificar a recorrência individual vs. coletiva.
+    # - **Timestamp (SS Abertura):** Para medir a "Velocidade de Propagação" do problema (Cluster Temporal).
+    # - **NLP Sentiment (CAMPO OBSERVAÇÃO):** O campo de observação será usado estritamente para extrair a "dor" e o sentimento do cliente, e não para extrair endereços que já possuímos em colunas dedicadas.
     # Agregação via View de Análise (filtro temporal pré-processado)
     params = {
         "select": "bairro, matricula, servico, ano",
