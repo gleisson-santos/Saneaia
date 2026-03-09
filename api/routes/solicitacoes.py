@@ -156,7 +156,7 @@ async def get_analytics_por_setor():
     supabase = get_supabase_client()
     data = await supabase.get("solicitacoes", {
         "select": "setor",
-        "limit": "10000",
+        "limit": "100000",
     })
     from collections import Counter
     setores = Counter(d.get("setor", "") for d in data)

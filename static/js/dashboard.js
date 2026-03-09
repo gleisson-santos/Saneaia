@@ -149,7 +149,7 @@ async function loadAnalytics() {
     if (reinc && reinc.data) {
         let html = '<table class="data-table"><thead><tr><th>Matrícula</th><th>Solicitações</th><th>Bairros</th></tr></thead><tbody>';
         reinc.data.slice(0, 15).forEach(d => {
-            html += `<tr><td>${d.matricula}</td><td>${d.total_solicitacoes}</td><td>${d.bairros}</td></tr>`;
+            html += `<tr><td>${d.matricula}</td><td>${d.total_chamados || 0}</td><td>${d.bairro || '--'}</td></tr>`;
         });
         html += '</tbody></table>';
         document.getElementById('table-reincidencia').innerHTML = html;
@@ -163,9 +163,16 @@ const chatInput = document.getElementById('chat-input');
 function addMessage(text, isUser = false) {
     const div = document.createElement('div');
     div.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
-    div.innerHTML = `<div class="message-avatar">${isUser ? '👤' : '🤖'}</div>
-        <div class="message-content">${text.replace(/\n/g, '<br>')}</div>`;
+
+    // Check if marked.js is loaded, otherwise fallback to simple replace
+    const parsedText = (typeof marked !== 'undefined' && !isUser)
+        ? marked.parse(text)
+        : text.replace(/\n/g, '<br>');
+
+    div.innerHTML = `<div class="message-avatar">${isUser ? '<i data-lucide="user"></i>' : '<i data-lucide="bot"></i>'}</div>
+        <div class="message-content">${parsedText}</div>`;
     chatMessages.appendChild(div);
+    if (typeof lucide !== 'undefined') lucide.createIcons();
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
@@ -173,8 +180,9 @@ function addTyping() {
     const div = document.createElement('div');
     div.className = 'message bot-message';
     div.id = 'typing-msg';
-    div.innerHTML = '<div class="message-avatar">🤖</div><div class="message-content"><div class="typing-indicator"><span></span><span></span><span></span></div></div>';
+    div.innerHTML = '<div class="message-avatar"><i data-lucide="bot"></i></div><div class="message-content"><div class="typing-indicator"><span></span><span></span><span></span></div></div>';
     chatMessages.appendChild(div);
+    if (typeof lucide !== 'undefined') lucide.createIcons();
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
