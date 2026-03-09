@@ -4,6 +4,11 @@
 
 const API = '';
 
+// === Global State ===
+let globalTemporalData = [];
+let globalYearFilter = 'Todos';
+let evolucaoAnualChartInstance = null;
+
 // === Navigation ===
 document.querySelectorAll('.nav-item').forEach(item => {
     item.addEventListener('click', e => {
@@ -112,34 +117,169 @@ async function loadBairros() {
     if (res) renderBarChart('chart-bairros', res.data, 'bairro', 'total_solicitacoes');
 }
 
-async function loadTemporal() {
-    const res = await api('/api/analytics/temporal');
-    if (res) renderBarChart('chart-temporal', res.data, 'mes', 'total_solicitacoes');
-}
-
-// === Sazonalidade Chart ===
-async function loadSazonalidade() {
+// === Temporal / Sazonalidade / Evolução Anual ===
+async function fetchAndProcessTemporalData() {
     const res = await api('/api/analytics/temporal');
     if (!res || !res.data) return;
 
+    globalTemporalData = res.data;
+
+    // Extract unique years
+    const years = [...new Set(globalTemporalData.map(d => d.ano))].sort((a, b) => a - b);
+
+    // Build Year Filter UI
+    const filtersContainer = document.getElementById('year-filters-container');
+    let buttonsHtml = `<span class="text-sm" style="color: var(--text-muted); margin-right: 8px; font-size: 0.85rem;">Filtro Ano:</span>`;
+
+    // Add "Todos" button
+    buttonsHtml += `<button class="year-filter-btn ${globalYearFilter === 'Todos' ? 'active' : ''}" onclick="setYearFilter('Todos')">Todos</button>`;
+
+    // Add Year buttons
+    years.forEach(y => {
+        buttonsHtml += `<button class="year-filter-btn ${globalYearFilter === y.toString() ? 'active' : ''}" onclick="setYearFilter('${y}')">${y}</button>`;
+    });
+
+    filtersContainer.innerHTML = buttonsHtml;
+
+    // Render the Multi-year Line Chart (not affected by global filter, it shows all years for contrast)
+    renderEvolucaoAnualChart(years);
+
+    // Render the specific year charts based on current filter
+    updateYearlyCharts();
+}
+
+function setYearFilter(yearStr) {
+    globalYearFilter = yearStr;
+    // Update active class on buttons
+    document.querySelectorAll('.year-filter-btn').forEach(btn => {
+        if (btn.textContent === yearStr) btn.classList.add('active');
+        else btn.classList.remove('active');
+    });
+    // Re-render dependent charts
+    updateYearlyCharts();
+}
+
+function updateYearlyCharts() {
+    // Filter data
+    const filteredData = globalYearFilter === 'Todos'
+        ? globalTemporalData
+        : globalTemporalData.filter(d => d.ano.toString() === globalYearFilter);
+
+    // 1. Re-render Análise Temporal (Bar Chart)
+    // We group by month to sum up solicitacoes if 'Todos' is selected
+    const monthMap = {};
+    const monthNames = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+
+    filteredData.forEach(d => {
+        const m = d.mes_numero;
+        if (!monthMap[m]) monthMap[m] = { mes: d.mes, total_solicitacoes: 0, mes_numero: m };
+        monthMap[m].total_solicitacoes += d.total_solicitacoes;
+    });
+
+    // Ensure all months are in order
+    const temporalAggregated = Object.values(monthMap).sort((a, b) => a.mes_numero - b.mes_numero);
+    renderBarChart('chart-temporal', temporalAggregated, 'mes', 'total_solicitacoes', 12);
+
+    // 2. Re-render Análise Sazonal
     let verao = 0; // Dez a Mar
     let chuvas = 0; // Abr a Jul
     let secas = 0; // Ago a Nov
 
-    res.data.forEach(d => {
+    filteredData.forEach(d => {
         const m = d.mes_numero;
         if (m >= 4 && m <= 7) chuvas += d.total_solicitacoes;
         else if (m >= 8 && m <= 11) secas += d.total_solicitacoes;
         else verao += d.total_solicitacoes;
     });
 
-    const chartData = [
-        { periodo: 'Período Chuvoso (Abr-Jul)', total: chuvas },
-        { periodo: 'Verão (Dez-Mar)', total: verao },
-        { periodo: 'Primavera/Seca (Ago-Nov)', total: secas }
+    const sazonalidadeData = [
+        { periodo: "Período Chuvoso (Abr-Jul)", total: chuvas },
+        { periodo: "Verão (Dez-Mar)", total: verao },
+        { periodo: "Primavera/Seca (Ago-Nov)", total: secas }
     ].sort((a, b) => b.total - a.total);
 
-    renderBarChart('chart-sazonalidade', chartData, 'periodo', 'total');
+    renderBarChart('chart-sazonalidade', sazonalidadeData, 'periodo', 'total');
+}
+
+function renderEvolucaoAnualChart(years) {
+    // Prepare Chart.js dataset
+    const datasets = [];
+
+    // Paleta de cores Enterprise
+    const colors = ['#94A3B8', '#38BDF8', '#3B82F6', '#2563EB', '#1E3A8A'];
+
+    years.forEach((y, i) => {
+        const yearData = globalTemporalData.filter(d => d.ano === y);
+        const dataArr = new Array(12).fill(0);
+
+        yearData.forEach(d => {
+            if (d.mes_numero >= 1 && d.mes_numero <= 12) {
+                dataArr[d.mes_numero - 1] = d.total_solicitacoes;
+            }
+        });
+
+        const color = colors[i % colors.length];
+        datasets.push({
+            label: y.toString(),
+            data: dataArr,
+            borderColor: color,
+            backgroundColor: color,
+            fill: false,
+            tension: 0.4, // Smooth curve
+            borderWidth: 2,
+            pointRadius: 3,
+            pointHoverRadius: 6
+        });
+    });
+
+    const ctx = document.getElementById('chart-evolucao-anual').getContext('2d');
+
+    if (evolucaoAnualChartInstance) {
+        evolucaoAnualChartInstance.destroy();
+    }
+
+    evolucaoAnualChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"],
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        boxWidth: 8,
+                        font: { family: "'Inter', sans-serif", size: 12 }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                    titleFont: { family: "'Inter', sans-serif" },
+                    bodyFont: { family: "'Inter', sans-serif" },
+                    padding: 10,
+                    cornerRadius: 4
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false, drawBorder: false },
+                    ticks: { font: { family: "'Inter', sans-serif", size: 11 }, color: '#64748B' }
+                },
+                y: {
+                    grid: { color: '#F1F5F9', drawBorder: false },
+                    ticks: { font: { family: "'Inter', sans-serif", size: 11 }, color: '#64748B' }
+                }
+            }
+        }
+    });
 }
 
 // === Analytics Section ===
@@ -340,8 +480,8 @@ async function loadAll() {
     await checkHealth();
     loadKPIs();
     loadBairros();
-    loadTemporal();
-    loadSazonalidade();
+    // Fetch Temporal Data once, rendering Year Filters, Multi-Year Chart, Sazonalidade and Temporal Chart
+    await fetchAndProcessTemporalData();
     loadAnalytics();
     loadMapaCalorSetor();
 }

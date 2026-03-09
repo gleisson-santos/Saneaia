@@ -65,10 +65,20 @@
                 <button class="menu-toggle" id="menu-toggle">☰</button>
                 <h2 class="page-title" id="page-title">Dashboard</h2>
             </div>
+
             <div class="topbar-right">
-                <button class="btn-refresh" id="btn-refresh" title="Atualizar dados"><i data-lucide="refresh-cw"
-                        style="width: 18px; height: 18px;"></i></button>
-                <span class="topbar-time" id="topbar-time"></span>
+                <!-- Year Filters -->
+                <div class="year-filters" id="year-filters-container"
+                    style="display: flex; gap: 4px; margin-right: 16px; align-items: center;">
+                    <span class="text-sm"
+                        style="color: var(--text-muted); margin-right: 8px; font-size: 0.85rem;">Filtro Ano:</span>
+                    <!-- Buttons will be injected here via JS -->
+                </div>
+
+                <button class="btn-refresh" id="btn-refresh" onclick="loadAll()" title="Atualizar dados">
+                    <i data-lucide="refresh-cw" style="width: 18px; height: 18px;"></i>
+                </button>
+                <span class="topbar-time" id="topbar-time">00/00/0000, 00:00:00</span>
             </div>
         </header>
 
@@ -129,6 +139,16 @@
                 <div class="chart-card">
                     <h3 class="chart-title">Análise Temporal</h3>
                     <div class="chart-container" id="chart-temporal"></div>
+                </div>
+            </div>
+
+            <!-- Evolução Anual (Line Chart) -->
+            <div class="table-card" style="margin-top: 1.5rem;">
+                <h3 class="chart-title"><i data-lucide="trending-up"
+                        style="width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;"></i> Evolução
+                    Anual (Contraste de Demandas)</h3>
+                <div class="chart-container" style="height: 300px; padding-top: 10px;">
+                    <canvas id="chart-evolucao-anual"></canvas>
                 </div>
             </div>
 
@@ -251,11 +271,12 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         lucide.createIcons();
     </script>
-    <script src="/static/js/dashboard.js?v=5"></script>
+    <script src="/static/js/dashboard.js?v=6"></script>
 </body>
 
 </html>

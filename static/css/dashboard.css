@@ -430,6 +430,40 @@ body {
     text-overflow: ellipsis
 }
 
+/* Year Filters */
+.year-filters {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    background: var(--bg-primary);
+    padding: 4px;
+    border-radius: 6px;
+    border: 1px solid var(--border-subtle);
+}
+
+.year-filter-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.year-filter-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.year-filter-btn.active {
+    background: var(--accent-blue);
+    color: #ffffff;
+    box-shadow: var(--shadow-sm);
+}
+
 .bar-track {
     flex: 1;
     height: 24px;
