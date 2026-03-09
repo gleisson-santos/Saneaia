@@ -72,14 +72,34 @@ async def get_kpis():
 @router.get("/analytics/por-bairro")
 async def get_analytics_por_bairro(
     limit: int = Query(default=20, ge=1, le=100),
+    ano: Optional[int] = None,
 ):
-    """Analise de solicitacoes por bairro."""
+    """Analise de solicitacoes por bairro, com filtro opcional de ano."""
     supabase = get_supabase_client()
-    data = await supabase.get("analise_por_bairro", {
-        "order": "total_solicitacoes.desc",
-        "limit": str(limit),
+    if not ano:
+        data = await supabase.get("analise_por_bairro", {
+            "order": "total_solicitacoes.desc",
+            "limit": str(limit),
+        })
+        return {"data": data}
+        
+    # Agregação raw por ano
+    data = await supabase.get("solicitacoes", {
+        "select": "bairro, created_at",
+        "limit": "100000",
     })
-    return {"data": data}
+    
+    from collections import Counter
+    target_year = str(ano)
+    bairros = Counter()
+    for d in data:
+        c_at = d.get("created_at", "")
+        if c_at and c_at.startswith(target_year):
+            b = d.get("bairro") or "Sem Bairro"
+            bairros[b] += 1
+            
+    result = [{"bairro": k, "total_solicitacoes": v} for k, v in bairros.most_common(limit)]
+    return {"data": result}
 
 
 @router.get("/analytics/por-logradouro")

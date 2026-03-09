@@ -112,8 +112,10 @@ function renderBarChart(containerId, data, labelKey, valueKey, maxItems = 10) {
 }
 
 // === Load Dashboard Charts ===
-async function loadBairros() {
-    const res = await api('/api/analytics/por-bairro?limit=10');
+async function loadBairros(ano = 'Todos') {
+    let url = '/api/analytics/por-bairro?limit=10';
+    if (ano !== 'Todos') url += `&ano=${ano}`;
+    const res = await api(url);
     if (res) renderBarChart('chart-bairros', res.data, 'bairro', 'total_solicitacoes');
 }
 
@@ -199,14 +201,24 @@ function updateYearlyCharts() {
     ].sort((a, b) => b.total - a.total);
 
     renderBarChart('chart-sazonalidade', sazonalidadeData, 'periodo', 'total');
+
+    // 3. Re-render Top Bairros via API call
+    loadBairros(globalYearFilter);
 }
 
 function renderEvolucaoAnualChart(years) {
     // Prepare Chart.js dataset
     const datasets = [];
 
-    // Paleta de cores Enterprise
-    const colors = ['#94A3B8', '#38BDF8', '#3B82F6', '#2563EB', '#1E3A8A'];
+    // Paleta de cores mais contrastante, elegante e quente/vibrante
+    const colors = [
+        '#64748B', // Gray/Slate para ano antigo (base)
+        '#F59E0B', // Amber/Yellow vibrante (Quente)
+        '#10B981', // Emerald/Green (Suave/Neutro)
+        '#8B5CF6', // Violet/Purple (Dinâmico)
+        '#F43F5E', // Rose/Red (Alerta/Quente)
+        '#0EA5E9'  // Sky Blue (Frio/Diferenciado)
+    ];
 
     years.forEach((y, i) => {
         const yearData = globalTemporalData.filter(d => d.ano === y);
@@ -479,7 +491,8 @@ document.getElementById('btn-refresh').addEventListener('click', () => loadAll()
 async function loadAll() {
     await checkHealth();
     loadKPIs();
-    loadBairros();
+    // loadBairros() is now triggered by fetchAndProcessTemporalData() inside updateYearlyCharts() setup
+
     // Fetch Temporal Data once, rendering Year Filters, Multi-Year Chart, Sazonalidade and Temporal Chart
     await fetchAndProcessTemporalData();
     loadAnalytics();

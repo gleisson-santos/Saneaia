@@ -130,6 +130,16 @@
                 </div>
             </div>
 
+            <!-- Evolução Anual (Line Chart) -->
+            <div class="table-card" style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
+                <h3 class="chart-title"><i data-lucide="trending-up"
+                        style="width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;"></i> Evolução
+                    Anual (Contraste de Demandas)</h3>
+                <div class="chart-container" style="height: 300px; padding-top: 10px;">
+                    <canvas id="chart-evolucao-anual"></canvas>
+                </div>
+            </div>
+
             <!-- Charts Row -->
             <div class="charts-row">
                 <div class="chart-card">
@@ -139,16 +149,6 @@
                 <div class="chart-card">
                     <h3 class="chart-title">Análise Temporal</h3>
                     <div class="chart-container" id="chart-temporal"></div>
-                </div>
-            </div>
-
-            <!-- Evolução Anual (Line Chart) -->
-            <div class="table-card" style="margin-top: 1.5rem;">
-                <h3 class="chart-title"><i data-lucide="trending-up"
-                        style="width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;"></i> Evolução
-                    Anual (Contraste de Demandas)</h3>
-                <div class="chart-container" style="height: 300px; padding-top: 10px;">
-                    <canvas id="chart-evolucao-anual"></canvas>
                 </div>
             </div>
 
@@ -276,7 +276,7 @@
     <script>
         lucide.createIcons();
     </script>
-    <script src="/static/js/dashboard.js?v=6"></script>
+    <script src="/static/js/dashboard.js?v=7"></script>
 </body>
 
 </html>
