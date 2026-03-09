@@ -26,7 +26,12 @@ A integração cruza a predição matemática com a heurística de inteligência
 - **Alerta por Logradouro** (quando o problema é da rede pública na rua)
 - **Análise de Passivo** (para infraestruturas antigas e estáveis)
 
-### 🔌 3. API e Conectividade
+### 🛡️ 3. Causal Fingerprinting (Hydraulic DNA)
+O SanealA agora possui um motor de **Clustering Espaço-Temporal** que identifica a causa raiz de falhas:
+- **Eventos Mestres:** Identifica automaticamente se múltiplas reclamações vizinhas são sintomas de um evento maior (ex: rompimento de adutora).
+- **Diagnóstico Isolado:** Heurística baseada em conhecimento de campo para identificar **Obstruções de Ramal** em imóveis específicos quando a rede ao redor está estável.
+
+### 🔌 4. API e Conectividade
 A API construída em **FastAPI** serve como ponte entre os motores de IA e os painéis de consumo (ex: Lovable, Supabase Edge Functions).
 - Recebe requisições via `POST /api/integrations/analyze-external-demands`.
 - Retorna JSONs estruturados para enriquecer Dashboards gerenciais em tempo real.
