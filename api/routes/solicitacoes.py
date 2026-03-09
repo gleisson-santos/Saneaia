@@ -77,14 +77,18 @@ async def get_analytics_bairros_criticos(
     """Retorna os bairros com maiores indices de reincidencia e insatisfacao (Falta de agua, Vazamentos, Reclamacoes)."""
     supabase = get_supabase_client()
         
-    # Agregação raw dinâmica para suportar metricas de cruzamento e filtro temporal
-    data = await supabase.get("solicitacoes", {
-        "select": "bairro, matricula, servico, created_at",
-        "limit": "100000",
-    })
+    # Agregação via View de Análise (filtro temporal pré-processado)
+    params = {
+        "select": "bairro, matricula, servico, ano",
+        "limit": "100000"
+    }
+    
+    if ano:
+        params["ano"] = f"eq.{ano}"
+        
+    data = await supabase.get("solicitacoes_analise", params)
     
     from collections import defaultdict, Counter
-    target_year = str(ano) if ano else None
     
     bairros_score = Counter()
     matriculas_por_bairro = defaultdict(list)
@@ -94,11 +98,7 @@ async def get_analytics_bairros_criticos(
     keywords = ["FALTA AGUA", "VAZ", "RECL", "QUALIDADE", "RETORNO", "DESOBS"]
     
     for d in data:
-        if target_year:
-            c_at = d.get("created_at", "")
-            if not c_at or not c_at.startswith(target_year):
-                continue
-                
+        # A View já fornece o bairro e as métricas
         b = d.get("bairro") or "Sem Bairro"
         mat = d.get("matricula")
         srv = str(d.get("servico", "")).upper()
@@ -114,7 +114,7 @@ async def get_analytics_bairros_criticos(
     # Processa métricas
     for b, mats in matriculas_por_bairro.items():
         count_mats = Counter(mats)
-        # Uma reincidência é quando uma mesma matrícula tem 2 ou mais demandas
+        # Uma reincidência é quando uma mesma matrícula tem 2 ou mais demandas no período filtrado
         reincidencias = sum(1 for count in count_mats.values() if count > 1)
         
         # Peso do Índice Crítico: Reincidências pesam o dobro

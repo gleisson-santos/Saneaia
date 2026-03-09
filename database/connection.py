@@ -22,13 +22,13 @@ class SupabaseClient:
 
     # --- Async methods (for FastAPI routes) ---
 
-    async def get(self, table: str, params: dict = None) -> list:
+    async def get(self, table: str, params: dict | list = None) -> list:
         """GET request para uma tabela/view do Supabase."""
         async with httpx.AsyncClient(timeout=30) as client:
             response = await client.get(
                 f"{self.base_url}/{table}",
                 headers=self.headers,
-                params=params or {},
+                params=params if params is not None else {},
             )
             response.raise_for_status()
             return response.json()
