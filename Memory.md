@@ -1,7 +1,8 @@
 # 🧠 Memória do Sistema (SanealA)
 
 Este documento atua como o **Changelog** e **Base de Conhecimento Central** do projeto SanealA. Ele registra todas as evoluções, arquiteturas criadas, heurísticas aplicadas e integrações realizadas.
-> **Regra de Ouro:** Toda nova funcionalidade, correção de bug crítico ou alteração no comportamento da IA deve ser registrada aqui.
+
+**Visão Geral:** O SanealA é uma plataforma preditiva que une Machine Learning (Random Forest) e NLP (Grok 4.1 Fast) para antecipar falhas de infraestrutura, focando em "Recency-First" para reduzir o passivo operacional e aumentar a eficiência das equipes de campo.
 
 ---
 
